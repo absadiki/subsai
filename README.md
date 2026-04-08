@@ -104,8 +104,26 @@ _Quoted from the official openai/whisper installation_
 * Once ffmpeg is installed, install `subsai`
 
 ```shell
-pip install git+https://github.com/absadiki/subsai
+# Install base package (no backends — lightweight, fast install)
+pip install git+https://github.com/absadiki/subsai.git
+
+# Install with a specific backend only
+pip install "git+https://github.com/absadiki/subsai.git#egg=subsai[faster-whisper]"
+pip install "git+https://github.com/absadiki/subsai.git#egg=subsai[whisper]"
+pip install "git+https://github.com/absadiki/subsai.git#egg=subsai[stable-ts]"
+
+# Install multiple backends
+pip install "git+https://github.com/absadiki/subsai.git#egg=subsai[faster-whisper,api]"
+
+# Install everything (all backends + web UI — old behavior)
+pip install "git+https://github.com/absadiki/subsai.git#egg=subsai[all]"
+
+# Install the web UI
+pip install "git+https://github.com/absadiki/subsai.git#egg=subsai[webui]"
 ```
+
+Available extras: `whisper`, `faster-whisper`, `stable-ts`, `whisperx`, `timestamped`, `whisper-cpp`, `transformers`, `api`, `webui`, `all`
+
 > [!NOTE]
 > * It is recommended to use Python 3.10 or 3.11. Versions 3.12 or later may have compatibility issues.
 > * If torch is unable to detect your GPU devices during your usage of subsai, assuming you have a supported GPU device, there is a chance that `pip` installed the CPU version of torch. You can install a torch version with CUDA support by following the [get started locally guide](https://pytorch.org/get-started/locally/) on pytorch.
@@ -175,9 +193,9 @@ subsai media.txt --model openai/whisper --format srt
 To install:
 1. `git clone https://github.com/absadiki/subsai`
 2. `cd subsai`
-3. `uv pip install -e .`
+3. `pip install -e ".[faster-whisper]"` (or whichever backend you need)
 
-*Note: For minimal installs or if having issues installing dependencies, you can comment the dependencies for backends you won't use in the file `requirements.txt`.*
+*Note: Install only the backends you need to avoid dependency conflicts. Use `pip install -e ".[all]"` to install everything.*
 
 ```python
 from subsai import SubsAI
