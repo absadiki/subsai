@@ -5,6 +5,9 @@
 Utility functions
 """
 
+import pathlib
+from typing import Optional, Union
+
 import torch
 from pysubs2.formats import FILE_EXTENSION_TO_FORMAT_IDENTIFIER
 
@@ -66,3 +69,45 @@ def available_subs_formats(include_extensions=True):
     else:
         # remove the '.' separator from extension names
         return [ext.split('.')[1] for ext in extensions]
+
+
+def build_subtitle_path(
+    media_file: Union[str, pathlib.Path],
+    subs_format: str = 'srt',
+    destination_folder: Optional[Union[str, pathlib.Path]] = None,
+    output_suffix: Optional[str] = None,
+    language_suffix: Optional[str] = None,
+) -> pathlib.Path:
+    """
+    Build the output path for a subtitle file, optionally inserting a language
+    code before the extension (e.g. ``video.en.srt``).
+
+    This is useful for media servers like Plex and Jellyfin that auto-detect
+    subtitle language from the filename pattern ``video.LANG.ext``.
+
+    :param media_file: path to the source media file
+    :param subs_format: subtitle format / extension (without dot), e.g. ``srt``
+    :param destination_folder: optional output directory (defaults to same
+        folder as *media_file*)
+    :param output_suffix: optional string appended to the stem before the
+        language code
+    :param language_suffix: ISO-639 language code to insert before the
+        extension (e.g. ``en``, ``ar``, ``ja``). If *None*, no language code
+        is added.
+
+    :return: :class:`pathlib.Path` of the subtitle file
+    """
+    media_path = pathlib.Path(media_file)
+
+    if destination_folder is not None:
+        folder = pathlib.Path(destination_folder).absolute()
+    else:
+        folder = media_path.parent
+
+    stem = media_path.stem
+    if output_suffix is not None:
+        stem = stem + output_suffix
+    if language_suffix is not None:
+        stem = stem + '.' + language_suffix
+
+    return folder / (stem + '.' + subs_format)
