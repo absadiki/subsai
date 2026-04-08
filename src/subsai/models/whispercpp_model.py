@@ -235,7 +235,7 @@ class WhisperCppModel(AbstractModel):
 
         self.model = Model(model=self.model_type, **self.params)
 
-    def transcribe(self, media_file) -> str:
+    def transcribe(self, media_file) -> SSAFile:
         segments = self.model.transcribe(media=media_file, **self.params)
         subs = SSAFile()
         for seg in segments:

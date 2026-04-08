@@ -173,36 +173,40 @@ class WhisperAPIModel(AbstractModel):
                 os.remove(chunk_path)
             raise e
 
-    def transcribe(self, media_file: str) -> str:
+    def transcribe(self, media_file: str) -> SSAFile:
 
         audio_file_path = convert_video_to_audio_ffmpeg(media_file)
 
-        chunks = self.chunk_audio(audio_file_path)
+        try:
+            chunks = self.chunk_audio(audio_file_path)
 
-        print(f"Processing {len(chunks)} audio chunks with {self.n_jobs} parallel jobs")
+            print(f"Processing {len(chunks)} audio chunks with {self.n_jobs} parallel jobs")
 
-        # Prepare chunk data for parallel processing
-        chunk_data = [(i, chunk, offset) for i, (chunk, offset) in enumerate(chunks)]
+            # Prepare chunk data for parallel processing
+            chunk_data = [(i, chunk, offset) for i, (chunk, offset) in enumerate(chunks)]
 
-        # Use parallel processing if n_jobs > 1, otherwise process sequentially
-        if self.n_jobs > 1:
-            # Use threading backend since API calls are I/O-bound
-            parallel_results = Parallel(n_jobs=self.n_jobs, backend="threading")(
-                delayed(self._transcribe_chunk)(data) for data in chunk_data
-            )
-        else:
-            # Sequential processing for n_jobs=1
-            parallel_results = [self._transcribe_chunk(data) for data in chunk_data]
+            # Use parallel processing if n_jobs > 1, otherwise process sequentially
+            if self.n_jobs > 1:
+                # Use threading backend since API calls are I/O-bound
+                parallel_results = Parallel(n_jobs=self.n_jobs, backend="threading")(
+                    delayed(self._transcribe_chunk)(data) for data in chunk_data
+                )
+            else:
+                # Sequential processing for n_jobs=1
+                parallel_results = [self._transcribe_chunk(data) for data in chunk_data]
 
-        # Sort results by chunk index to maintain order
-        parallel_results.sort(key=lambda x: x[0])
+            # Sort results by chunk index to maintain order
+            parallel_results.sort(key=lambda x: x[0])
 
-        # Process results and apply time offsets
-        results = ""
-        for i, result_text, offset in parallel_results:
-            # Shift subtitles by offset
-            result = SSAFile.from_string(result_text)
-            result.shift(ms=offset)
-            results += result.to_string("srt")
+            # Process results and apply time offsets
+            results = ""
+            for i, result_text, offset in parallel_results:
+                # Shift subtitles by offset
+                result = SSAFile.from_string(result_text)
+                result.shift(ms=offset)
+                results += result.to_string("srt")
 
-        return SSAFile.from_string(results)
+            return SSAFile.from_string(results)
+        finally:
+            if os.path.exists(audio_file_path):
+                os.unlink(audio_file_path)

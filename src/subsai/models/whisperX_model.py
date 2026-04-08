@@ -126,7 +126,7 @@ class WhisperXModel(AbstractModel):
                                          download_root=self.download_root,
                                          language=self.language)
 
-    def transcribe(self, media_file) -> str:
+    def transcribe(self, media_file) -> SSAFile:
         audio = whisperx.load_audio(media_file)
         result = self.model.transcribe(audio, batch_size=self.batch_size)
         model_a, metadata = whisperx.load_align_model(language_code=result["language"], device=self.device)
