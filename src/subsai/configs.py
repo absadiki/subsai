@@ -5,45 +5,49 @@
 Configurations file
 """
 
+import logging
+
+_logger = logging.getLogger(__name__)
+
 from ffsubsync.constants import DEFAULT_MAX_SUBTITLE_SECONDS, DEFAULT_START_SECONDS, DEFAULT_MAX_OFFSET_SECONDS, \
     DEFAULT_APPLY_OFFSET_SECONDS, DEFAULT_FRAME_RATE, DEFAULT_VAD
 
 try:
     from subsai.models.faster_whisper_model import FasterWhisperModel
-except ImportError as e:
-    print(e)
+except Exception:
+    _logger.debug("faster-whisper backend not available (install with: pip install subsai[faster-whisper])")
 try:
     from subsai.models.hugging_face_model import HuggingFaceModel
-except ImportError as e:
-    print(e)
+except Exception:
+    _logger.debug("transformers backend not available (install with: pip install subsai[transformers])")
 try:
     from subsai.models.whisperX_model import WhisperXModel
-except ImportError as e:
-    print(e)
+except Exception:
+    _logger.debug("whisperX backend not available (install with: pip install subsai[whisperx])")
 try:
     from subsai.models.whisper_model import WhisperModel
-except ImportError as e:
-    print(e)
+except Exception:
+    _logger.debug("whisper backend not available (install with: pip install subsai[whisper])")
 try:
     from subsai.models.whisper_timestamped_model import WhisperTimeStamped
-except ImportError as e:
-    print(e)
+except Exception:
+    _logger.debug("whisper-timestamped backend not available (install with: pip install subsai[timestamped])")
 try:
     from subsai.models.whispercpp_model import WhisperCppModel
-except ImportError as e:
-    print(e)
+except Exception:
+    _logger.debug("whisper.cpp backend not available (install with: pip install subsai[whisper-cpp])")
 try:
     from subsai.utils import get_available_devices, available_translation_models
-except ImportError as e:
-    print(e)
+except Exception:
+    _logger.debug("utils not available")
 try:
     from subsai.models.stable_ts_model import StableTsModel
-except ImportError as e:
-    print(e)
+except Exception:
+    _logger.debug("stable-ts backend not available (install with: pip install subsai[stable-ts])")
 try:
     from subsai.models.whisper_api_model import WhisperAPIModel
-except ImportError as e:
-    print(e)
+except Exception:
+    _logger.debug("whisper API backend not available (install with: pip install subsai[api])")
 
 AVAILABLE_MODELS = {}
 if "WhisperModel" in locals():
@@ -116,7 +120,15 @@ if "HuggingFaceModel" in locals():
         'config_schema': HuggingFaceModel.config_schema,
     }
 if not AVAILABLE_MODELS:
-    raise Exception("subsai couldn't find any available models")
+    import warnings
+    warnings.warn(
+        "No transcription backends found. Install at least one backend, e.g.:\n"
+        "  pip install subsai[faster-whisper]\n"
+        "  pip install subsai[all]\n"
+        "Available extras: whisper, faster-whisper, stable-ts, whisperx, "
+        "timestamped, whisper-cpp, transformers, api",
+        stacklevel=2,
+    )
 
 BASIC_TOOLS_CONFIGS = {
     'set time': {
