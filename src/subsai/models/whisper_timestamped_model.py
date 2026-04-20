@@ -252,7 +252,7 @@ class WhisperTimeStamped(AbstractModel):
                                                     download_root=self.download_root,
                                                     in_memory=self.in_memory)
 
-    def transcribe(self, media_file) -> str:
+    def transcribe(self, media_file) -> SSAFile:
         audio = whisper_timestamped.load_audio(media_file)
         results = whisper_timestamped.transcribe(self.model, audio,
                                                  verbose=self.verbose,

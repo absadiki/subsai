@@ -9,6 +9,7 @@ See [openai/whisper](https://github.com/openai/whisper)
 
 from typing import Tuple
 import pysubs2
+from pysubs2 import SSAFile
 from subsai.models.abstract_model import AbstractModel
 import whisper
 from subsai.utils import _load_config, get_available_devices
@@ -203,7 +204,7 @@ class WhisperModel(AbstractModel):
                                         download_root=self.download_root,
                                         in_memory=self.in_memory)
 
-    def transcribe(self, media_file) -> str:
+    def transcribe(self, media_file) -> SSAFile:
         audio = whisper.load_audio(media_file)
         result = self.model.transcribe(audio,
                                        verbose=self.verbose,

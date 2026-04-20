@@ -251,7 +251,7 @@ class FasterWhisperModel(AbstractModel):
         logging.basicConfig()
         logging.getLogger("faster_whisper").setLevel(logging.DEBUG)
 
-    def transcribe(self, media_file) -> str:
+    def transcribe(self, media_file) -> SSAFile:
         segments, info = self.model.transcribe(media_file, **self.transcribe_configs)
         subs = SSAFile()
         total_duration = round(info.duration, 2)  # Same precision as the Whisper timestamps.

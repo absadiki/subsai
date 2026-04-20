@@ -107,7 +107,7 @@ class SubsAI:
 
         :return: SSAFile: list of subtitles
         """
-        if type(model) == str:
+        if isinstance(model, str):
             stt_model = SubsAI.create_model(model, model_config)
         else:
             stt_model = model
@@ -142,7 +142,7 @@ class Tools:
         :param model: the name of the model
         :return: list of available languages
         """
-        if type(model) == str:
+        if isinstance(model, str):
             langs = Tools.create_translation_model(model).available_languages()
         else:
             langs = model.available_languages()
@@ -180,7 +180,7 @@ class Tools:
 
         :return: returns an `SSAFile` subtitles translated to the target language
         """
-        if type(model) == str:
+        if isinstance(model, str):
             translation_model = Tools.create_translation_model(model_name=model, model_family=model_family)
         else:
             translation_model = model
@@ -240,6 +240,11 @@ class Tools:
             os.unlink(srtin_file.name)
             srtout_file.close()
             os.unlink(srtout_file.name)
+            if os.path.exists(srtin):
+                os.unlink(srtin)
+            if os.path.exists(srtout):
+                os.unlink(srtout)
+
     @staticmethod
     def merge_subs_with_video(subs: Dict[str, SSAFile],
                   media_file: str,
